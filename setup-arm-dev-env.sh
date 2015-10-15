@@ -1,12 +1,14 @@
 #!/bin/bash
+#Copyright 2014-2015 Ionut Neicu, all rights reserved.
+#This script is provided as it is, without any warranty. Use on own risk.
+#This script can be used freely for cros compile on Raspberry PI. 
 
-
-NCPU=`cat /proc/cpuinfo |grep vendor_id |wc -l`
+NCPU=`cat /proc/cpuinfo | grep vendor_id | wc -l`
 
 
 #The RASPBERRY PI mount options. Modify this accordingly.
 
-RASPB_ADDR=192.168.0.15
+RASPB_ADDR=192.168.0.16
 RASP_USER=pi
 
 export RASPB_SYSROOT="/home/ionut/work/rspb/player-project/mount-sysroot-rpi"

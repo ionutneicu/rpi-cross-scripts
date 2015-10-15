@@ -1,48 +1,16 @@
 #!/bin/bash
-
+#Copyright 2014-2015 Ionut Neicu, all rights reserved.
+#This script is provided as it is, without any warranty. Use on own risk.
+#This script can be used freely for cros compile on Raspberry PI. 
 
 NCPU=`cat /proc/cpuinfo |grep vendor_id |wc -l`
 
 
 #The RASPBERRY PI mount options. Modify this accordingly.
 
+#Mount the required folders from RPI's system image
 
-export RASPB_SYSROOT="/home/ionut/work/rspb/player-project/rpi-snapshot"
-
-
-
-# Additional folders required for linker. Inside RPI, there are some .so files pointing to /lib/arm-linux-gnueabihf and /usr/lib/arm-linux-gnueabihf on target.
-# You must have them on host as well. Some people reccomend editing .so file inside rasp and removing paths there. This should not be required with this alternate approach.
-
-
-
-
-echo "checking if RASPBERRY's /lib/arm-linux-gnueabihf is mounted on /lib/arm-linux-gnueabihf ( required to link against some target .so files ) ... "
-
-if grep -qs "/lib/arm-linux-gnueabihf" /proc/mounts; then
-        echo "/lib/arm-linux-gnueabihf is mounted, unmounting"
-        sudo umount /lib/arm-linux-gnueabihf
-fi
-
-
-echo "checking if RASPBERRY's /usr/lib/arm-linux-gnueabihf is mounted on /usr/lib/arm-linux-gnueabihf ( required to link against some target .so files ) ... "
-
-if grep -qs "/usr/lib/arm-linux-gnueabihf" /proc/mounts; then
-         echo "/usr/lib/arm-linux-gnueabihf is mounted, skipping"
-         sudo umount /usr/lib/arm-linux-gnueabihf
-fi
-
-
-if [  -d "/lib/arm-linux-gnueabihf" ]; then
-       sudo rm -rf /lib/arm-linux-gnueabihf
-fi
-
-if [ -d "/usr/lib/arm-linux-gnueabihf" ]; then
-       sudo rm -rf /usr/lib/arm-linux-gnueabihf
-fi
-
-sudo ln -s ${RASPB_SYSROOT}/usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf
-sudo ln -s ${RASPB_SYSROOT}/lib/arm-linux-gnueabihf /lib/arm-linux-gnueabihf
+#source local-mount-rpi-image.sh
 
 #the folder where you
 export CROSS_PATH="/home/ionut/work/rspb/cross-compile/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin"
@@ -62,8 +30,8 @@ export LIBRARY_PATH=${LIBRARY_PATH}:${RASPB_SYSROOT}/usr/lib/arm-linux-gnueabihf
 
 
 #it looks like the ARM compiler has some issues. add rpath to the .so folders and their dependencies"
-export AM_LDFLAGS="-Wl,-rpath-link -Wl,${RASPB_SYSROOT}/lib/arm-linux-gnueabihf -Wl,-rpath-link -Wl,${RASPB_SYSROOT}/usr/lib/arm-linux-gnueabihf -L${RASPB_SYSROOT}/opt/vc/lib"
-export AM_CPPFLAGS_OMX="-I${RASPB_SYSROOT}/opt/vc/include/IL"
+export LDFLAGS="-Wl,-rpath-link -Wl,${RASPB_SYSROOT}/lib/arm-linux-gnueabihf -Wl,-rpath-link -Wl,${RASPB_SYSROOT}/usr/lib/arm-linux-gnueabihf -L${RASPB_SYSROOT}/opt/vc/lib"
+export CPPFLAGS_OMX="-I${RASPB_SYSROOT}/opt/vc/include/IL"
 
 
 #pkgconfig paths must contain all .pc files required to determine include and lib files for dependency packages.
@@ -84,11 +52,11 @@ export PKG_CONFIG_PATH
 #this could be also subhect of change if extra system includes required.
 #the other include will be determined by pkg-config utility directly on target
 
-echo "RaspSysroot="$RASPB_SYSROOT
-export AM_CPPFLAGS="-I${RASPB_SYSROOT}/usr/include -I${RASPB_SYSROOT}/opt/vc/include/ -I${RASPB_SYSROOT}/opt/vc/include/interface/vcos/pthreads -I${RASPB_SYSROOT}/opt/vc/include/interface/vmcs_host/linux ${AM_CPPFLAGS_OMX} -DDEBUG -g -O0"
+export CPPFLAGS="-I${RASPB_SYSROOT}/usr/include -I${RASPB_SYSROOT}/opt/vc/include/ -I${RASPB_SYSROOT}/opt/vc/include/interface/vcos/pthreads -I${RASPB_SYSROOT}/opt/vc/include/interface/vmcs_host/linux ${CPPFLAGS_OMX} -DDEBUG"
 
-export AM_CXXFLAGS="-g -O0"
-export AM_CFLAGS="-g -O0"
+#comment these 2 lines below if not usining debug, also undefine debug in the line above.
+export CXXFLAGS="-g -O0"
+export CFLAGS="-g -O0"
 
 echo "**********************************"
 echo "* RPI devenv successfully set up *"
